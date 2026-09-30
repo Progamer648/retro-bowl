@@ -1,0 +1,36 @@
+name: Compile Standalone Offline HTML
+
+on:
+  workflow_dispatch: # Allows you to run this manually whenever you want
+
+permissions:
+  contents: write
+
+jobs:
+  build-single-file:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Game Files
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Inliner Compiler
+        run: npm install -g inliner
+
+      - name: Compile Folder Into Standalone HTML
+        # This forces the engine to hardcode and compress every sub-asset into index.html
+        run: inliner index.html > RetroBowl_Offline.html
+
+      - name: Create Offline Release Bundle
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: offline-build-${{ github.run_number }}
+          name: Retro Bowl Standalone Offline Build
+          draft: false
+          prerelease: false
+          files: RetroBowl_Offline.html
