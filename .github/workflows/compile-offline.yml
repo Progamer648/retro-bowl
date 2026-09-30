@@ -19,23 +19,24 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Bundling Engine
+      - name: Install Advanced Bundler
         run: npm install -g html-inline
 
-      - name: Remove External Stylesheet Crash Triggers
-        # Cleans out any remote code dependencies from the true game file
+      - name: Prep GameMaker Paths
+        # This fixes a GameMaker bug by ensuring local paths resolve flatly inside the single file
         run: |
-          sed -i '\|bootstrapcdn.com|d' production.html
-          sed -i '\|googleapis.com|d' production.html
+          sed -i 's|"html5game/"|""|g' index.html 2>/dev/null || true
+          sed -i 's|"html5game/"|""|g' production.html 2>/dev/null || true
+          if [ -d "html5game" ]; then cp html5game/* .; fi
 
       - name: Compile Folder Into Standalone HTML
-        # CHANGED: We are now compiling production.html which holds the actual game engine files
-        run: html-inline -i production.html -o RetroBowl_Offline.html
+        # Targets index.html and binds all real underlying code maps into it
+        run: html-inline -i index.html -o RetroBowl_Offline.html
 
       - name: Verify File Size
         run: |
-          if [ ! -s RetroBowl_Offline.html ]; then
-            echo "Error: RetroBowl_Offline.html is empty!"
+          if [ ! -s RetroBowl_Offline.html ] || [ $(stat -c%s RetroBowl_Offline.html) -le 500000 ]; then
+            echo "Error: File is missing or too small (engine assets failed to inject)!"
             exit 1
           fi
 
