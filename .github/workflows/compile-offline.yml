@@ -1,7 +1,7 @@
 name: Compile Standalone Offline HTML
 
 on:
-  workflow_dispatch: # Allows you to run this manually whenever you want
+  workflow_dispatch: # Allows manual trigger
 
 permissions:
   contents: write
@@ -19,12 +19,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Inliner Compiler
-        run: npm install -g inliner
+      - name: Install Bundling Engine
+        run: npm install -g html-inline
 
       - name: Compile Folder Into Standalone HTML
-        # This forces the engine to hardcode and compress every sub-asset into index.html
-        run: inliner index.html > RetroBowl_Offline.html
+        # Using html-inline handles game assets and scripts much more reliably
+        run: html-inline -i index.html -o RetroBowl_Offline.html
+
+      - name: Verify File Size
+        # This prevents an error by stopping the script if the bundle didn't compile correctly
+        run: |
+          if [ ! -s RetroBowl_Offline.html ]; then
+            echo "Error: RetroBowl_Offline.html is empty!"
+            exit 1
+          fi
 
       - name: Create Offline Release Bundle
         uses: softprops/action-gh-release@v2
