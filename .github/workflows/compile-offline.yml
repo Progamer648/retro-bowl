@@ -22,13 +22,11 @@ jobs:
       - name: Install Advanced Bundler
         run: npm install -g html-inline
 
-      - name: Hard-Purge All Remote Links
-        # This completely wipes out lines with bootstrap, google fonts, or external scripts so the compiler doesn't crash
+      - name: Precise Safe-Purge of Bootstrap Link Only
+        # This targets ONLY the bad bootstrap link line so the compiler won't crash, keeping the game engine safe
         run: |
-          sed -i '\|http://|d' index.html 2>/dev/null || true
-          sed -i '\|https://|d' index.html 2>/dev/null || true
-          sed -i '\|http://|d' production.html 2>/dev/null || true
-          sed -i '\|https://|d' production.html 2>/dev/null || true
+          sed -i '\|/bootstrap/|d' index.html 2>/dev/null || true
+          sed -i '\|/bootstrap/|d' production.html 2>/dev/null || true
 
       - name: Prep GameMaker Paths
         run: |
