@@ -1,7 +1,7 @@
 name: Compile Standalone Offline HTML
 
 on:
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,12 +22,16 @@ jobs:
       - name: Install Bundling Engine
         run: npm install -g html-inline
 
+      - name: Remove External Stylesheet Crash Triggers
+        # This deletes the online bootstrap reference that causes the bundler to crash
+        run: |
+          sed -i '/://bootstrapcdn.com' index.html
+          sed -i '/://googleapis.com' index.html
+
       - name: Compile Folder Into Standalone HTML
-        # Using html-inline handles game assets and scripts much more reliably
         run: html-inline -i index.html -o RetroBowl_Offline.html
 
       - name: Verify File Size
-        # This prevents an error by stopping the script if the bundle didn't compile correctly
         run: |
           if [ ! -s RetroBowl_Offline.html ]; then
             echo "Error: RetroBowl_Offline.html is empty!"
