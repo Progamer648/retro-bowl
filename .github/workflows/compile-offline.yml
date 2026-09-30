@@ -23,13 +23,14 @@ jobs:
         run: npm install -g html-inline
 
       - name: Remove External Stylesheet Crash Triggers
-        # Using | instead of / prevents the command-line engine from crashing on web links
+        # Cleans out any remote code dependencies from the true game file
         run: |
-          sed -i '\|bootstrapcdn.com|d' index.html
-          sed -i '\|googleapis.com|d' index.html
+          sed -i '\|bootstrapcdn.com|d' production.html
+          sed -i '\|googleapis.com|d' production.html
 
       - name: Compile Folder Into Standalone HTML
-        run: html-inline -i index.html -o RetroBowl_Offline.html
+        # CHANGED: We are now compiling production.html which holds the actual game engine files
+        run: html-inline -i production.html -o RetroBowl_Offline.html
 
       - name: Verify File Size
         run: |
